@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  role      String
+  chain     String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  scenarios Scenario[]
+}
+
+model Scenario {
+  id        String   @id @default(uuid())
+  name      String
+  walletId  String
+  createdAt DateTime @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+  runs   Run[]
+}
+
+model Run {
+  id         String   @id @default(uuid())
+  scenarioId String
+  status     String
+  createdAt  DateTime @default(now())
+  riskScore  Int?
+  riskLevel  String?
+
+  scenario     Scenario      @relation(fields: [scenarioId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  runId     String
+  toAddress String
+  amount    Float
+  txHash    String?
+  status    String
+  createdAt DateTime @default(now())
+
+  run Run @relation(fields: [runId], references: [id])
+}
